@@ -7,6 +7,7 @@ from PIL import Image
 import argparse
 import os
 import copy
+import torch.nn as nn
 
 
 LABELS_Severity = {35: 0,
@@ -63,7 +64,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--annot_train_prime', type = str, default = 'df_prime_train.csv')
     parser.add_argument('--annot_test_prime', type = str, default = 'df_prime_test.csv')
-    parser.add_argument('--data_root', type = str, default = '')
+    parser.add_argument('--data_root', type = str, default = '"C:\Prime_FULL"')
     return parser.parse_args()
 
 # Define the autoencoder architecture
@@ -106,6 +107,7 @@ if __name__ == '__main__':
      
     # Feature extraction is required before using the SVM model 
     # Extract HOG features for training images 
+    os.environ['TORCH_HOME'] = "C:\Prime_FULL"
     X_train = []
     y_train = []
     for i in range(len(trainset)):
