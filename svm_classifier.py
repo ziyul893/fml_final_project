@@ -8,6 +8,8 @@ import argparse
 import os
 import copy
 import torch.nn as nn
+#from skimage.feature import hog
+
 
 
 LABELS_Severity = {35: 0,
@@ -53,7 +55,7 @@ class OCTDataset(Dataset):
         img, target = Image.open(self.root+self.path_list[index]).convert("L"), self._labels[index]
 
         if self.transform is not None:
-            img = self.transform(img)
+            img = self.transform(img) # reshape
 
         return img, target
 
@@ -64,7 +66,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--annot_train_prime', type = str, default = 'df_prime_train.csv')
     parser.add_argument('--annot_test_prime', type = str, default = 'df_prime_test.csv')
-    parser.add_argument('--data_root', type = str, default = '"C:\Prime_FULL"')
+    parser.add_argument('--data_root', type = str, default = '/storage/home/hpaceice1/shared-classes/materials/ece8803fm')
     return parser.parse_args()
 
 # Define the autoencoder architecture
@@ -82,13 +84,13 @@ class Autoencoder(nn.Module):
             nn.ReLU(),
         )
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(2, 4, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(2, 4, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(4, 8, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(4, 8, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(8, 16, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(16, 1, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(16, 1, kernel_size=3, stride=2, padding=1),
             nn.Sigmoid(),
         )
 
@@ -99,6 +101,7 @@ class Autoencoder(nn.Module):
 
 
 if __name__ == '__main__':
+    labels = [35,43,47,53,61,65,71,85]
     args = parse_args()
     trainset = OCTDataset(args, 'train', transform=transform)
     testset = OCTDataset(args, 'test', transform=transform)
@@ -107,7 +110,13 @@ if __name__ == '__main__':
      
     # Feature extraction is required before using the SVM model 
     # Extract HOG features for training images 
-    os.environ['TORCH_HOME'] = "C:\Prime_FULL"
+    os.environ['TORCH_HOME'] = "/storage/home/hpaceice1/shared-classes/materials/ece8803fm"
+    print(torch.cuda.is_available())
+
+    train_dataloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+    test_dataloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True) 
+
+    '''
     X_train = []
     y_train = []
     for i in range(len(trainset)):
@@ -125,9 +134,32 @@ if __name__ == '__main__':
         X_test.append(features)
         y_test.append(target)
 
+'''
     # use autoencoder to convert 1x224x224 img to 2 dimensions
-    ae = Autoencoder()
-    encoded_data,decoded_data = ae.forward(X_train)
+    ae = Autoencoder().to('cuda')
+    #encoded_data,decoded_data = ae.forward(X_train)
+    
+    # train the autoencoder 
+    optimizer = torch.optim.Adam(ae.parameters(), lr=1e-3)
+    loss_fn = nn.MSELoss()
+    num_epochs = 50
+
+    
+    for epoch in range(num_epochs):
+        for i, (x, y) in enumerate(train_dataloader):
+            ae.train()
+            ae.zero_grad()      
+            # extract input, obtain model output, loss, and backpropagate
+            input=x.cuda()
+            target=y.cuda()
+
+            out = ae(input)
+            loss_val=loss_fn(out,target).cuda()
+            loss_val.backward()
+            optimizer.step()
+            print("done",i)
+
+        print('Epoch: {} | Loss:{:0.6f}'.format(epoch, loss_val.item()))
    
     # Split the dataset into training and testing sets using encoded data
     X_train, X_val, y_train, y_val = train_test_split(encoded_data, y_train, test_size=0.3, random_state=0)
