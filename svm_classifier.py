@@ -8,6 +8,7 @@ import argparse
 import os
 import copy
 import torch.nn as nn
+import torch.nn.functional as F
 #from skimage.feature import hog
 
 
@@ -26,7 +27,7 @@ mean = (.1706)
 std = (.2112)
 normalize = transforms.Normalize(mean=mean, std=std)
 
-# resize to (3,224,224)
+# resize to (1,224,224)
 transform = transforms.Compose([
     transforms.Resize(size=(224,224)),
     transforms.ToTensor(),
@@ -66,38 +67,40 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--annot_train_prime', type = str, default = 'df_prime_train.csv')
     parser.add_argument('--annot_test_prime', type = str, default = 'df_prime_test.csv')
-    parser.add_argument('--data_root', type = str, default = '/storage/home/hpaceice1/shared-classes/materials/ece8803fm')
+    parser.add_argument('--data_root', type = str, default = 'C:/fml_final_project')
     return parser.parse_args()
 
 # Define the autoencoder architecture
 class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(16, 8, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(8, 4, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(4, 2, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-        )
-        self.decoder = nn.Sequential(
-            nn.Conv2d(2, 4, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(4, 8, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(16, 1, kernel_size=3, stride=2, padding=1),
-            nn.Sigmoid(),
-        )
+        ## encoder layers ##
+        # conv layer (depth from 3 --> 16), 3x3 kernels
+        self.conv1 = nn.Conv2d(1, 16, 3, padding=1)  
+        # conv layer (depth from 16 --> 4), 3x3 kernels
+        self.conv2 = nn.Conv2d(16, 4, 3, padding=1)
+        # pooling layer to reduce x-y dims by two; kernel and stride of 2
+        self.pool = nn.MaxPool2d(2, 2)
+        
+        ## decoder layers ##
+        ## a kernel of 2 and a stride of 2 will increase the spatial dims by 2
+        self.t_conv1 = nn.ConvTranspose2d(4, 16, 2, stride=2)
+        self.t_conv2 = nn.ConvTranspose2d(16, 1, 2, stride=2)
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return encoded, decoded
+        ## encode ##
+        x = F.relu(self.conv1(x))
+        x = self.pool(x)
+        # add second hidden layer
+        x = F.relu(self.conv2(x))
+        x = self.pool(x)  # compressed representation
+        
+        ## decode ##
+        # add transpose conv layers, with relu activation function
+        x = F.relu(self.t_conv1(x))
+        # output layer (with sigmoid for scaling from 0 to 1)
+        x = F.sigmoid(self.t_conv2(x))
+        return x
 
 
 if __name__ == '__main__':
@@ -110,8 +113,8 @@ if __name__ == '__main__':
      
     # Feature extraction is required before using the SVM model 
     # Extract HOG features for training images 
-    os.environ['TORCH_HOME'] = "/storage/home/hpaceice1/shared-classes/materials/ece8803fm"
-    print(torch.cuda.is_available())
+    os.environ['TORCH_HOME'] = "C:/fml_final_project"
+    #print(torch.cuda.is_available())
 
     train_dataloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True) 
@@ -142,25 +145,37 @@ if __name__ == '__main__':
     # train the autoencoder 
     optimizer = torch.optim.Adam(ae.parameters(), lr=1e-3)
     loss_fn = nn.MSELoss()
-    num_epochs = 50
+    num_epochs = 5
 
     
     for epoch in range(num_epochs):
-        for i, (x, y) in enumerate(train_dataloader):
+        for i, (x,y) in enumerate(train_dataloader):    
             ae.train()
-            ae.zero_grad()      
+            #print('x size is:',x.shape)
+            optimizer.zero_grad()      
             # extract input, obtain model output, loss, and backpropagate
-            input=x.cuda()
-            target=y.cuda()
+            #x = torch.tensor(x)
+            #y = torch.tensor(y)
 
+            input=x.cuda()
+            #input = torch.tensor(input)
+
+            #target= input
+            #print (type(input))
+            #print(input.shape)
+            #print (type(target))
+            #print(target.shape)
             out = ae(input)
-            loss_val=loss_fn(out,target).cuda()
+            #out = torch.tensor(out)
+            #print(type(out))
+            #print(out.shape)
+            loss_val=loss_fn(input, out).cuda()
             loss_val.backward()
             optimizer.step()
-            print("done",i)
+            #print("done",i)
 
         print('Epoch: {} | Loss:{:0.6f}'.format(epoch, loss_val.item()))
-   
+    torch.save(ae.state_dict(), 'autoencoder_model.pth')
     # Split the dataset into training and testing sets using encoded data
     X_train, X_val, y_train, y_val = train_test_split(encoded_data, y_train, test_size=0.3, random_state=0)
 
