@@ -1,6 +1,7 @@
 # fml_final_project
-ECE 8803 FML Final Project 
-None of the code need any arguments, just running the .py file should train, print, and save everything that you need!
+ECE 8803 Final Project 
+
+None of the code need any arguments, just running the .py file should train, print, and save everything that you need! Change the directory to your own.
 
 AE.py: used for training and saving autoencoder that resizes frames in OLIVES to (512,512), then readjusts to (8,8) or (1,2) as needed.
 
