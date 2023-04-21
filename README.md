@@ -1,7 +1,25 @@
-# fml_final_project
+# ECE 8803 Final Project 
 ECE 8803 Final Project 
 
-None of the code need any arguments, just running the .py file should train, print, and save everything that you need! Change the directory to your own.
+Contributer: Michael Meng, Ziyu Liu
+
+Georgia Instiute of Technology
+
+## Project Breif 
+This Project is using 4 different approaches of Machine Learning algorithm to classify the Diabetic Retinopathy Severity Scale (DRSS) on OCT images from the [OLIVES dataset](https://arxiv.org/pdf/2209.11195.pdf). The full, pre-labeled OLIVE dataset includes both the PRIME and TREX_DME trails, and for the purpose of this project, data collected from PRIME trail was used. Within the PRIME data, there are 32,337 samples taken from 658 volumes. Example picture provided is a gray scale picture with (1x224x224) size which is disclosed below.
+![example_OCT](0.png)
+
+While the label include 8 classes of DRSS score -- 35, 43, 47, 53, 61, 65, 71, 85 -- we used a larger buffer to further categorize the images into 3 DRSS classes based on the score. 
+
+![DRSS_classify_pic](DRSS_classify.png)
+
+By the end of the project, our goal is to train machine learning models that classify the provided image into DRSS Severity Level 0, 1, or 2
+
+The language we used for this project is python, and 4 different methods we used are K-Nearest Neighbors (KNN), Support Vector Machines (SVM), and two Convolutional Neural Network (CNN) architectures Alexnet and Resnet50. Among those two CNN architectures, Alexnet was trained from scrach, and Resnet50 was pre-trained and used for transfer learning. 
+
+## Repository Navigation
+If you want to re-produce our result, just download the OLIVE dataset and run the code in correct directory. 
+None of the code need any arguments, just running the .py file should train, print, and save everything that you need! The .py files have two types -- ones for training and ones for testing. AE.py, Train_Resnet.py, Train_Alexnet.py are used for training models, and Test.py tests loads the trained model for prediction. AE is used for SVM and KNN prediction, and the idea is to reduce the computation resources required for classification. 
 
 AE.py: used for training and saving autoencoder that resizes frames in OLIVES to (512,512), then readjusts to (8,8) or (1,2) as needed.
 
