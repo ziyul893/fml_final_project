@@ -56,7 +56,7 @@ if __name__ == '__main__':
     train_dataloader = DataLoader(trainset, batch_size=1, shuffle=True)
     test_dataloader = DataLoader(testset, batch_size=1, shuffle=True)
 
-    model = torch.jit.load('AlexNet_normal.pt')
+    model = torch.jit.load('AlexNet_notnormal_no1_5_lr007.pt')
     model.eval()
     appeared = [0, 0, 0]
     correct = [0, 0, 0]
