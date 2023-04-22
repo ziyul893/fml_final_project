@@ -152,8 +152,9 @@ if __name__ == '__main__':
     knn.fit(X_train, y_train).predict(X_test)
     '''
 
+
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
     # loss
-    hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
-    print('accuracy: ', accuracy, 'loss:',hinge_loss)
+    #hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
+    print('accuracy: ', accuracy)#, 'loss:',hinge_loss)
