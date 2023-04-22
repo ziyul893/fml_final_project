@@ -112,7 +112,7 @@ if __name__ == '__main__':
     # set up optimizer with the specified learning rate
     optimizer = torch.optim.SGD(model.parameters(),lr=lr, momentum=0.9)
 
-    for epoch in range(epochs):
+    for epoch in range(epochs): #flashbulb training with epoch 5
         if epoch == 5:
             optimizer.param_groups[0]['lr'] = 0.001
             for i, (x, y, z) in enumerate(train_dataloader):
@@ -152,6 +152,6 @@ if __name__ == '__main__':
 
     
     model_scripted = torch.jit.script(model) # Export to TorchScript
-    model_scripted.save('AlexNet_notnormal_no1_5_lr007.pt') # Save
+    model_scripted.save('AlexNet_notnormal_no1_5_lr007.pt') # save to file, name is dynamic
     
     
