@@ -76,7 +76,7 @@ if __name__ == '__main__':
     train_dataloader = DataLoader(trainset, batch_size=1, shuffle=True)
     test_dataloader = DataLoader(testset, batch_size=1, shuffle=True)
 
-    model = torch.jit.load('AE_for_train_final.pt')
+    model = torch.jit.load('AE_for_visual_finals.pt')
     '''
     #model.eval()
     appeared = [0, 0, 0]
@@ -129,25 +129,31 @@ if __name__ == '__main__':
         out, rep = model(x)
         rep = rep.detach().cpu().numpy()
         X_train.append(rep.reshape(1,-1))
-        y_train.append(y)
+        y_train.append(y.item())
         #print(i,' train')
     for i,(x,y,z) in enumerate(test_dataloader):
         x = x.cuda()
         out, rep = model(x)
         X_test.append(rep.detach().cpu().numpy().reshape(1,-1))
-        y_test.append(y)
+        y_test.append(y.item())
         #print(i,' test')
     
 
-    
-    '''Bayes Classifier
+    X_test = np.array(X_test).squeeze()
+    X_train = np.array(X_train).squeeze()
+    y_train = np.array(y_train).squeeze()
+    y_test = np.array(y_test).squeeze()
+
     gnb = GaussianNB()
     y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
     '''
-    
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(X_train, y_train).predict(X_test)
+    '''
+
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
     # loss
-    hinge_loss = sklearn.metrics.hinge_loss(y_train, y_pred)
+    hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
     print('accuracy: ', accuracy, 'loss:',hinge_loss)
