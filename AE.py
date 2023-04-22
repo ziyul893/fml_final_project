@@ -10,9 +10,6 @@ import copy
 import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib as plt
-#from skimage.feature import hog
-
-
 
 LABELS_Severity = {35: 0,
                    43: 0,
@@ -76,13 +73,14 @@ class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
         ## encoder layers ##
-        # conv layer (depth from 3 --> 16), 3x3 kernels
+        # conv layer (depth from 1 --> 8), 3x3 kernels
         self.conv1 = nn.Conv2d(1, 8, 3, padding=1)  
-        # conv layer (depth from 16 --> 4), 3x3 kernels
+        # conv layer (depth from 8 --> 4), 3x3 kernels
         self.conv2 = nn.Conv2d(8, 4, 3, padding=1)
+        # conv layer (depth from 4 --> 2), 3x3 kernels
         self.conv3 = nn.Conv2d(4, 2, 3, padding=1)
+        # conv layer (depth from 2 --> 1), 3x3 kernels
         self.conv4 = nn.Conv2d(2, 1, 3, padding=1)
-        #self.conv5 = nn.Conv2d(2, 1, 3, padding=1)
         # pooling layer to reduce x-y dims by two
         self.pool = nn.MaxPool2d(2, 2)
         self.pool2 = nn.MaxPool2d(4, 4)
@@ -91,7 +89,6 @@ class Autoencoder(nn.Module):
         
         ## decoder layers ##
         ## a kernel of 2 and a stride of 2 will increase the spatial dims by 2
-        #self.t_conv1 = nn.ConvTranspose2d(1, 2, 8, stride=8)
         self.t_conv2 = nn.ConvTranspose2d(1, 2, 8, stride=8)
         self.t_conv3 = nn.ConvTranspose2d(2, 4, 4, stride=4)
         self.t_conv4 = nn.ConvTranspose2d(4, 8, 4, stride=4)
@@ -113,11 +110,9 @@ class Autoencoder(nn.Module):
         x = self.pool3(x)  # compressed representation
         
         lower_rep = x
-        # 64
-        #print(x.size())
         
         ## decode ##
-        # add transpose conv layers, with relu activation function
+        # add transpose conv layers, with relu activation function after each conv layer 
         x = F.relu(self.t_conv2(x))
         x = F.relu(self.t_conv3(x))
         x = F.relu(self.t_conv4(x))
@@ -131,34 +126,15 @@ if __name__ == '__main__':
     args = parse_args()
     trainset = OCTDataset(args, 'train', transform=transform)
     testset = OCTDataset(args, 'test', transform=transform)
-    # print(trainset[1][0].shape)
-    # print(len(trainset), len(testset))
      
     # Feature extraction is required before using the SVM model 
     # Extract HOG features for training images 
     os.environ['TORCH_HOME'] = "S:/8803Proj"
-    #print(torch.cuda.is_available())
+    #print(torch.cuda.is_available()) # check the environment 
 
     train_dataloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True) 
 
-    '''
-    X_train = []
-    y_train = []
-    for i in range(len(trainset)):
-        img, target = trainset[i]
-        features = hog(img.numpy().squeeze(), orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), transform_sqrt=True, feature_vector=True)
-        X_train.append(features)
-        y_train.append(target)
-    # Extract HOG features for testing images 
-    X_test = []
-    y_test = []
-    for i in range(len(testset)):
-        img, target = testset[i]
-        features = hog(img.numpy().squeeze(), orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), transform_sqrt=True, feature_vector=True)
-        X_test.append(features)
-        y_test.append(target)
-'''
     # use autoencoder to convert 1x224x224 img to 2 dimensions
     ae = Autoencoder().to('cuda')
     #encoded_data,decoded_data = ae.forward(X_train)
@@ -186,16 +162,3 @@ if __name__ == '__main__':
         
     model_scripted = torch.jit.script(ae) # Export to TorchScript
     model_scripted.save('AE_for_visual_finals.pt') # Save
-    # Split the dataset into training and testing sets using encoded data
-    X_train, X_val, y_train, y_val = train_test_split(encoded_data, y_train, test_size=0.3, random_state=0)
-
-    # initiate svm classifier 
-    svmclf = svm.SVC(kernel = 'linear')
-    # train the svm model
-    svmclf.fit(X_train,y_train)
-    y_pred = clf.predict(X_test)
-
-    # accuracy score 
-    accuracy = accuracy_score(y_test, y_pred)
-    # loss
-    hinge_loss = metrics.hinge_loss(y_train, y_pred)
