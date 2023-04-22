@@ -144,14 +144,13 @@ if __name__ == '__main__':
     y_train = np.array(y_train).squeeze()
     y_test = np.array(y_test).squeeze()
 
-    gnb = GaussianNB() #Naive Bayes Classifier
-    y_pred = gnb.fit(X_train, y_train).predict(X_test)
+    '''gnb = GaussianNB()
+    y_pred = gnb.fit(X_train, y_train).predict(X_test)'''
 
-    ''' Knn classifier
-    knn = KNeighborsClassifier(n_neighbors=3)
-    knn.fit(X_train, y_train).predict(X_test)
-    '''
-
+    
+    knn = sklearn.neighbors.KNeighborsClassifier(n_neighbors=3)
+    y_pred = knn.fit(X_train, y_train).predict(X_test)
+    
 
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
