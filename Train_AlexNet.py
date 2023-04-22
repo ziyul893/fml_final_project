@@ -120,7 +120,7 @@ if __name__ == '__main__':
                     model.train()
                     optimizer.zero_grad()
 
-                            # extract input, obtain model output, loss, and backpropagate
+                     # extract input, obtain model output, loss, and backpropagate
                     input=x.cuda()
                     input = (input - input.min())/(input.max()-input.min())
                     target=y.cuda()
@@ -133,11 +133,11 @@ if __name__ == '__main__':
         else: 
             for i, (x, y, z) in enumerate(train_dataloader):
                 if(y.cuda().item() == 0)or (y.cuda().item() == 2):
-                    #print(i)
+              
                     model.train()
                     optimizer.zero_grad()
 
-                                    # extract input, obtain model output, loss, and backpropagate
+                    # extract input, obtain model output, loss, and backpropagate
                     input=x.cuda()
                     input = (input - input.min())/(input.max()-input.min())
                     target=y.cuda()
