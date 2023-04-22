@@ -30,6 +30,7 @@ import torch.nn.functional as F
 from sklearn.svm import SVC
 import sklearn
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 LABELS_Severity = {35: 0,
                    43: 0,
                    47: 1,
@@ -149,13 +150,13 @@ if __name__ == '__main__':
     '''gnb = GaussianNB()
     y_pred = gnb.fit(X_train, y_train).predict(X_test)'''
 
-   
-    knn = sklearn.neighbors.KNeighborsClassifier(n_neighbors=3)
+    
+    knn = KNeighborsClassifier(n_neighbors=3)
     y_pred = knn.fit(X_train, y_train).predict(X_test)
     
 
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
-    # loss. Have sizing and type problems so unable to feature this
-    # hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
-    # print('accuracy: ', accuracy)#, 'loss:',hinge_loss)
+    # loss
+    #hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
+    print('accuracy: ', accuracy)#, 'loss:',hinge_loss)
