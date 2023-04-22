@@ -5,7 +5,7 @@ Contributer: Michael Meng, Ziyu Liu
 
 Georgia Instiute of Technology
 
-Watch the presentation: https://youtu.be/JqCqhoMEpwQ
+Watch the presentation: https://youtu.be/xSJhzkPIE3Y
 
 ## Project Breif 
 This Project is using 4 different approaches of Machine Learning algorithm to classify the Diabetic Retinopathy Severity Scale (DRSS) on OCT images from the [OLIVES dataset](https://arxiv.org/pdf/2209.11195.pdf). The full, pre-labeled OLIVE dataset includes both the PRIME and TREX_DME trails, and for the purpose of this project, data collected from PRIME trail was used. Within the PRIME data, there are 32,337 samples taken from 658 volumes. Example picture provided is a gray scale picture with (1x224x224) size which is disclosed below.
