@@ -140,9 +140,11 @@ if __name__ == '__main__':
     
 
     
+    '''Bayes Classifier
     gnb = GaussianNB()
     y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
+    '''
     
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
