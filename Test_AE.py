@@ -29,6 +29,7 @@ import Train_ResNet
 import torch.nn.functional as F
 from sklearn.svm import SVC
 import sklearn
+from sklearn.naive_bayes import GaussianNB
 LABELS_Severity = {35: 0,
                    43: 0,
                    47: 1,
@@ -137,17 +138,11 @@ if __name__ == '__main__':
         y_test.append(y)
         #print(i,' test')
     
-    # initiate svm classifier 
-    svmclf = SVC(kernel='poly', degree=3, C=1).fit(X_train, y_train)
-    # train the svm model
-    svmclf.fit(X_train,y_train)
-    y_pred = svmclf.predict(X_test)
 
-    ''' Bayes Classifier
-    from sklearn.naive_bayes import GaussianNB
+    
     gnb = GaussianNB()
     y_pred = gnb.fit(X_train, y_train).predict(X_test)
-    '''
+
     
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
