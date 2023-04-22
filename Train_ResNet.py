@@ -259,7 +259,7 @@ if __name__ == '__main__':
     # set up optimizer with the specified learning rate
     optimizer = torch.optim.SGD(model.fc.parameters(),lr=lr, momentum=0.9)
 
-    '''for epoch in range(epochs):
+    for epoch in range(epochs):
         if epoch == 15:
             optimizer = torch.optim.SGD(model.fc.parameters(),lr=1, momentum=0.9)
             for i, (x, y, z) in enumerate(train_dataloader):
@@ -305,36 +305,8 @@ if __name__ == '__main__':
 
         print('Epoch: {} | Loss:{:0.6f}'.format(epoch, loss_val.item()))
 
-    '''
+    
     model_scripted = torch.jit.script(model) # Export to TorchScript
     model_scripted.save('hi.pt') # Save
     
-    # create Grad-CAM object
-    gradcam = GradCAM(model, 50) #print last layer
-
-    # Grad-CAM result list
-    gradcam_list = []
-
-    # prediction label list
-    pred_list = []
-
-    for i, (img_tensor, label, eye) in enumerate(test_dataloader):
-
-        img_tensor = img_tensor.cuda()
-        mask_gradcam, logit = gradcam(img_tensor)
-
-        output = F.softmax(logit, dim=1)
-        pred_class_idx = output.argmax(dim=1)
-
-        # convert to original size
-        mask_gradcam = F.interpolate(mask_gradcam.cpu(), np.asarray(img_tensor).shape[:2], mode='bilinear', align_corners=False)
-
-        # align heatmap with image
-        heatmap, result = visualize_cam(mask_gradcam[0, 0, :, :].numpy(), img_tensor)
-
-        gradcam_list.append(result)
-    
-    # visualize result
-    vis_img_label(gradcam_list, pred_list)
-
 
