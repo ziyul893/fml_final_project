@@ -259,7 +259,7 @@ if __name__ == '__main__':
     # set up optimizer with the specified learning rate
     optimizer = torch.optim.SGD(model.fc.parameters(),lr=lr, momentum=0.9)
 
-    for epoch in range(epochs):
+    for epoch in range(epochs): #flashbulb training on epoch 15
         if epoch == 15:
             optimizer = torch.optim.SGD(model.fc.parameters(),lr=1, momentum=0.9)
             for i, (x, y, z) in enumerate(train_dataloader):
