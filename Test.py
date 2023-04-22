@@ -62,7 +62,7 @@ if __name__ == '__main__':
     correct = [0, 0, 0]
     pred = [0,0,0]
     
-    with torch.no_grad():
+    with torch.no_grad(): #only getting the accuracy for a CNN model
         for i in range(7987):
             img, target, eye = next(iter(test_dataloader)) # extract image from train loader
             img = img.cuda()
