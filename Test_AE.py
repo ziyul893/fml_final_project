@@ -79,6 +79,8 @@ if __name__ == '__main__':
     model = torch.jit.load('AE_for_visual_finals.pt')
     '''
     #model.eval()
+    
+    # autoencoder to 2d visualization
     appeared = [0, 0, 0]
     correct = [0, 0, 0]
     pred = [0,0,0]
@@ -147,13 +149,13 @@ if __name__ == '__main__':
     '''gnb = GaussianNB()
     y_pred = gnb.fit(X_train, y_train).predict(X_test)'''
 
-    
+   
     knn = sklearn.neighbors.KNeighborsClassifier(n_neighbors=3)
     y_pred = knn.fit(X_train, y_train).predict(X_test)
     
 
     # accuracy score 
     accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
-    # loss
-    #hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
-    print('accuracy: ', accuracy)#, 'loss:',hinge_loss)
+    # loss. Have sizing and type problems so unable to feature this
+    # hinge_loss = sklearn.metrics.hinge_loss(y_test, y_pred)
+    # print('accuracy: ', accuracy)#, 'loss:',hinge_loss)
