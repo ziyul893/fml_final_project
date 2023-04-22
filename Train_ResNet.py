@@ -194,8 +194,7 @@ class GradCAM():
     # calculate alpha (step1)
     alpha = np.mean(gradients.reshape((b, k, -1)),2)
 
-    # calculate Grad-CAM result using rectified weighted linear combination of feature activation maps (step2)
-    ##TODO
+    # calculate Grad-CAM result using rectified weighted linear combination of feature activation maps 
     weight = alpha.reshape((b, k, 1, 1))
     saliency_map = (weight*activations).sum(1, keepdim=True)
     saliency_map = F.relu(saliency_map)
@@ -209,6 +208,7 @@ class GradCAM():
   def __call__(self, input):
     return self.calculate(input)
 
+# generate heatmap to visualize Alexnet and Resnet50 predictions 
 def visualize_cam(mask, img):
     
     heatmap = cv2.applyColorMap(np.uint8(255 * mask), cv2.COLORMAP_JET)
@@ -267,7 +267,7 @@ if __name__ == '__main__':
                     model.train()
                     optimizer.zero_grad()
 
-                            # extract input, obtain model output, loss, and backpropagate
+                     # extract input, obtain model output, loss, and backpropagate
                     input=x.cuda()
                     target=y.cuda()
                             
@@ -288,7 +288,7 @@ if __name__ == '__main__':
                     model.train()
                     optimizer.zero_grad()
 
-                            # extract input, obtain model output, loss, and backpropagate
+                     # extract input, obtain model output, loss, and backpropagate
                     input=x.cuda()
                     target=y.cuda()
                             
